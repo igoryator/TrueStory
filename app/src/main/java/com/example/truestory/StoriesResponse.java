@@ -1,7 +1,7 @@
 package com.example.truestory;
 
 public final class StoriesResponse {
-    public static final int $stable = 8;
+
     private final StoriesContent content;
     public StoriesResponse(StoriesContent storiesContent0) {
         super();

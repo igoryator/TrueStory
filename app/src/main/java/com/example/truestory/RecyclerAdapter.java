@@ -3,6 +3,7 @@ package com.example.truestory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -15,10 +16,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private final int VIEW_TYPE_ITEM = 0;
     private final int VIEW_TYPE_LOADING = 1;
 
-    public List<String> mItemList;
+    public List<StoryItem> mItemList;
 
 
-    public RecyclerAdapter(List<String> itemList) {
+    public RecyclerAdapter(List<StoryItem> itemList) {
 
         mItemList = itemList;
     }
@@ -69,11 +70,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private class ItemViewHolder extends RecyclerView.ViewHolder {
 
         TextView tvItem;
+        ImageView imgItem;
 
         public ItemViewHolder(@NonNull View itemView) {
             super(itemView);
 
             tvItem = itemView.findViewById(R.id.tvItem);
+            imgItem = itemView.findViewById(R.id.imageView);
         }
     }
 
@@ -94,8 +97,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private void populateItemRows(ItemViewHolder viewHolder, int position) {
 
-        String item = mItemList.get(position);
+        String item = mItemList.get(position).getHeader();
         viewHolder.tvItem.setText(item);
+        viewHolder.imgItem.setImageBitmap(mItemList.get(position).getPicture());
 
     }
 

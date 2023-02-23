@@ -1,8 +1,7 @@
 package com.example.truestory;
 
+import com.example.truestory.models.Cluster;
 import com.squareup.moshi.Json;
-
-import java.util.List;
 
 public final class Story {
     @Json(name = "cluster_id")

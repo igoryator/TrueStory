@@ -1,10 +1,9 @@
-package com.example.truestory;
+package com.example.truestory.models;
 
+import com.example.truestory.Story;
 import com.squareup.moshi.Json;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public final class ContentData {
     @Json(name = "cluster_title_aggregate")
@@ -30,7 +29,7 @@ public final class ContentData {
         return this.issueAggregate;
     }
 
-    public final List getStories() {
+    public final List<Story> getStories() {
         return this.stories;
     }
 

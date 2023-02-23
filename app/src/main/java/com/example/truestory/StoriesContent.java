@@ -1,5 +1,7 @@
 package com.example.truestory;
 
+import com.example.truestory.models.ContentData;
+
 public final class StoriesContent {
     private final ContentData data;
     public StoriesContent(ContentData contentData0) {

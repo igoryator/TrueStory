@@ -1,8 +1,6 @@
-package com.example.truestory;
+package com.example.truestory.models;
 
 import com.squareup.moshi.Json;
-
-import java.util.List;
 
 public final class ClusterTitle {
 

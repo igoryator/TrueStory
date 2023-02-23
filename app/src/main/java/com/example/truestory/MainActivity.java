@@ -13,27 +13,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 
-
-import java.io.IOException;
 import java.util.ArrayList;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
-import retrofit2.Call;
-import retrofit2.Converter.Factory;
-import retrofit2.Response;
-import retrofit2.Retrofit.Builder;
-import retrofit2.converter.moshi.MoshiConverterFactory;
 
 public class MainActivity extends Activity {
 
     RecyclerView recyclerView;
     RecyclerAdapter recyclerAdapter;
-    List<String> rowsArrayList = new ArrayList<>();
+    List<StoryItem> rowsArrayList = new ArrayList<>();
 
     boolean isLoading = false;
     private final  Handler updateHandler = new Handler(Looper.getMainLooper()){
@@ -54,27 +45,7 @@ public class MainActivity extends Activity {
         OkHttpClient okHttpClient0 = new OkHttpClient().newBuilder().connectTimeout(20L, TimeUnit.SECONDS).readTimeout(20L, TimeUnit.SECONDS).writeTimeout(20L, TimeUnit.SECONDS).build();
 
     }
-    private List<String> getStories(int limit, int offset){
-        OkHttpClient okHttpClient0 = new OkHttpClient().newBuilder().connectTimeout(20L, TimeUnit.SECONDS).readTimeout(20L, TimeUnit.SECONDS).writeTimeout(20L, TimeUnit.SECONDS).build();
-        StoryApi api =  (StoryApi) new Builder().baseUrl("https://thetruestory.news/api/").client(okHttpClient0).addConverterFactory(((Factory)MoshiConverterFactory.create())).build().create(StoryApi.class);
-        Call<StoriesResponse> storiesReq = api.loadStories("ru", limit, offset, "1.0.3", 5, "android");
-        Response<StoriesResponse> resp;
-        StoriesResponse stories;
-        List<Story> clusters;
-        List<String> Headers = new ArrayList<String>();
-        try {
-            resp = storiesReq.execute();
-            stories = resp.body();
-            clusters = stories.getContent().getData().getStories();
-            for (Story item:clusters
-                 ) {
-                Headers.add(item.getCluster().getTitles().get(0).getTitle());
-            }
-        } catch (IOException e) {
-            return new ArrayList<String>();
-        }
-        return Headers;
-    }
+
     private void populateData() {
 
         rowsArrayList.add(null);
@@ -84,9 +55,10 @@ public class MainActivity extends Activity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                List<String> firstStories = getStories(10,0);
+                List<StoryItem> firstStories = StoryLoader.loadStories(10,0);
                 rowsArrayList.remove(rowsArrayList.size() - 1);
                 rowsArrayList.addAll(firstStories);
+
                 isLoading = false;
                 updateHandler.sendEmptyMessage(0);
             }
@@ -137,7 +109,7 @@ public class MainActivity extends Activity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                List<String> firstStories = getStories(10,scrollPosition);
+                List<StoryItem> firstStories = StoryLoader.loadStories(10,scrollPosition);
                 rowsArrayList.remove(rowsArrayList.size() - 1);
                 rowsArrayList.addAll(firstStories);
                 isLoading = false;
