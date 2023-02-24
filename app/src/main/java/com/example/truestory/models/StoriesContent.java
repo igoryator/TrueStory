@@ -1,4 +1,4 @@
-package com.example.truestory;
+package com.example.truestory.models;
 
 import com.example.truestory.models.ContentData;
 

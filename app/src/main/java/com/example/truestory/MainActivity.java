@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -26,10 +27,37 @@ public class MainActivity extends Activity {
     RecyclerAdapter recyclerAdapter;
     List<StoryItem> rowsArrayList = new ArrayList<>();
 
+    List<StoryItem> loadedStories = new ArrayList<>();
+    boolean isWaitingForUpdate = false;
     boolean isLoading = false;
+
+    StoryLoader storyLoader = new StoryLoader();
     private final  Handler updateHandler = new Handler(Looper.getMainLooper()){
         public void handleMessage(Message msg) {
-            recyclerAdapter.notifyDataSetChanged();
+
+            if(msg.what == 0){
+                // main list updated
+                if(isWaitingForUpdate){
+                    isWaitingForUpdate = false;
+                    if(rowsArrayList.get(rowsArrayList.size()-1)==null){
+                        int removePos = rowsArrayList.size() - 1;
+                        rowsArrayList.remove(removePos);
+                        recyclerAdapter.notifyItemRemoved(removePos);
+                    }
+
+                    int insertPos = rowsArrayList.size();
+                    rowsArrayList.addAll(loadedStories);
+                    recyclerAdapter.notifyItemRangeInserted(insertPos, loadedStories.size());
+                    loadedStories.clear();
+                    isLoading = false;
+                    loadNextPortion();
+
+                }
+
+
+                //recyclerAdapter.notifyDataSetChanged();
+            }
+
         }
     };
     @Override
@@ -51,14 +79,11 @@ public class MainActivity extends Activity {
         rowsArrayList.add(null);
         recyclerAdapter.notifyItemInserted(rowsArrayList.size() - 1);
         isLoading = true;
-        final List<String> firstStories;
+        isWaitingForUpdate = true;
         new Thread(new Runnable() {
             @Override
             public void run() {
-                List<StoryItem> firstStories = StoryLoader.loadStories(10,0);
-                rowsArrayList.remove(rowsArrayList.size() - 1);
-                rowsArrayList.addAll(firstStories);
-
+                loadedStories = storyLoader.loadStories(12);
                 isLoading = false;
                 updateHandler.sendEmptyMessage(0);
             }
@@ -67,10 +92,23 @@ public class MainActivity extends Activity {
 
 
     }
+    public class itmClickListener implements ItemClickListener{
+        @Override
+        public void itemClicked(View v, int position){
 
+            StoryItem itm = rowsArrayList.get(position);
+            if(itm.isGetFullText()){
+                itm.setGetFullText(false);
+            } else {
+                itm.setGetFullText(true);
+            }
+            recyclerAdapter.notifyItemChanged(position);
+        }
+    }
+    itmClickListener click = new itmClickListener();
     private void initAdapter() {
 
-        recyclerAdapter = new RecyclerAdapter(rowsArrayList);
+        recyclerAdapter = new RecyclerAdapter(rowsArrayList, click);
         recyclerView.setAdapter(recyclerAdapter);
     }
 
@@ -86,40 +124,57 @@ public class MainActivity extends Activity {
                 super.onScrolled(recyclerView, dx, dy);
 
                 LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == rowsArrayList.size() - 1) {
 
-                if (!isLoading) {
-                    if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == rowsArrayList.size() - 1) {
-                        //bottom of list!
-                        loadMore();
-                        isLoading = true;
-                    }
+                    //bottom of list!
+                    loadMore();
+
                 }
+
             }
         });
 
 
     }
-
-    private void loadMore() {
-        int scrollPosition = rowsArrayList.size();
-        rowsArrayList.add(null);
-        recyclerAdapter.notifyItemInserted(rowsArrayList.size() - 1);
-
-        final List<String> firstStories;
+    private void loadNextPortion(){
+        if(isLoading){
+            return;
+        }
+        isLoading = true;
         new Thread(new Runnable() {
             @Override
             public void run() {
-                List<StoryItem> firstStories = StoryLoader.loadStories(10,scrollPosition);
-                rowsArrayList.remove(rowsArrayList.size() - 1);
-                rowsArrayList.addAll(firstStories);
+                loadedStories = storyLoader.loadStories(12);
                 isLoading = false;
                 updateHandler.sendEmptyMessage(0);
             }
         }).start();
 
+    }
+    private void loadMore() {
+        if(isLoading){
+            // wait for new portion and draw loading
+            if(rowsArrayList.get(rowsArrayList.size()-1)==null){
+                return;
+            }
+            int scrollPosition = rowsArrayList.size();
+            rowsArrayList.add(null);
+            recyclerAdapter.notifyItemInserted(rowsArrayList.size() - 1);
+            isWaitingForUpdate = true;
 
+        } else{
+            if(!loadedStories.isEmpty()){
+                isWaitingForUpdate = true;
+                updateHandler.sendEmptyMessage(0);
 
-
+            } else {
+                int scrollPosition = rowsArrayList.size();
+                rowsArrayList.add(null);
+                recyclerAdapter.notifyItemInserted(rowsArrayList.size() - 1);
+                isWaitingForUpdate = true;
+                loadNextPortion();
+            }
+        }
 
     }
 

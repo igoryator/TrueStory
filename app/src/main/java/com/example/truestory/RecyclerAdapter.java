@@ -1,5 +1,6 @@
 package com.example.truestory;
 
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,22 +18,23 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private final int VIEW_TYPE_LOADING = 1;
 
     public List<StoryItem> mItemList;
+    ItemClickListener click;
 
+    public RecyclerAdapter(List<StoryItem> itemList, ItemClickListener click) {
 
-    public RecyclerAdapter(List<StoryItem> itemList) {
-
-        mItemList = itemList;
+        this.mItemList = itemList;
+        this.click = click;
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == VIEW_TYPE_ITEM) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_row, parent, false);
-            return new ItemViewHolder(view);
+            View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_row, parent, false);
+            return new ItemViewHolder(itemView);
         } else {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_loading, parent, false);
-            return new LoadingViewHolder(view);
+            View loadingView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_loading, parent, false);
+            return new LoadingViewHolder(loadingView);
         }
     }
 
@@ -67,16 +69,35 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
 
-    private class ItemViewHolder extends RecyclerView.ViewHolder {
+    private class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         TextView tvItem;
         ImageView imgItem;
 
+        String header;
+        Bitmap picture;
         public ItemViewHolder(@NonNull View itemView) {
             super(itemView);
-
             tvItem = itemView.findViewById(R.id.tvItem);
             imgItem = itemView.findViewById(R.id.imageView);
+            itemView.setOnClickListener(this);
+        }
+
+        public void setHeader(String header) {
+            this.header = header;
+            tvItem.setText(header);
+
+        }
+
+
+        public void setPicture(Bitmap picture){
+            this.picture = picture;
+            imgItem.setImageBitmap(this.picture);
+        }
+        @Override
+        public void onClick(View v) {
+            click.itemClicked(v, this.getLayoutPosition());
+
         }
     }
 
@@ -97,9 +118,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private void populateItemRows(ItemViewHolder viewHolder, int position) {
 
-        String item = mItemList.get(position).getHeader();
-        viewHolder.tvItem.setText(item);
-        viewHolder.imgItem.setImageBitmap(mItemList.get(position).getPicture());
+        viewHolder.setHeader(mItemList.get(position).getHeader());
+        Bitmap picture = mItemList.get(position).getPicture();
+        if(picture!=null){
+            viewHolder.setPicture(picture);
+        }
 
     }
 

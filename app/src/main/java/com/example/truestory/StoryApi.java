@@ -1,4 +1,5 @@
 package com.example.truestory;
+import com.example.truestory.models.StoriesResponse;
 import com.example.truestory.models.StoryDetailsResponse;
 
 import okhttp3.ResponseBody;

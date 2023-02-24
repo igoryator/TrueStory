@@ -1,6 +1,5 @@
 package com.example.truestory.models;
 
-import com.example.truestory.Story;
 import com.squareup.moshi.Json;
 
 import java.util.List;

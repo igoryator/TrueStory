@@ -8,11 +8,14 @@ public class StoryItem {
     private String header;
     private String content;
     private Bitmap picture;
+    boolean isGetFullText;
+
     public StoryItem(String cluster_id){
         this.cluster_id = cluster_id;
         this.picture = null;
         this.header = "";
         this.content = "";
+        this.isGetFullText = false;
     }
 
     public String getCluster_id() {
@@ -28,7 +31,18 @@ public class StoryItem {
     }
 
     public String getHeader() {
+        if(isGetFullText){
+            return content;
+        }
         return header;
+    }
+
+    public boolean isGetFullText() {
+        return isGetFullText;
+    }
+
+    public void setGetFullText(boolean getFullText) {
+        isGetFullText = getFullText;
     }
 
     public void setCluster_id(String cluster_id) {

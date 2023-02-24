@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import com.example.truestory.models.ClusterSummary;
+import com.example.truestory.models.StoriesResponse;
+import com.example.truestory.models.Story;
 import com.example.truestory.models.StoryDetailsResponse;
 
 import java.io.IOException;
@@ -23,11 +25,11 @@ public class StoryLoader {
     public StoryLoader(){
 
     }
-
-    static public List<StoryItem> loadStories(int limit, int offset){
+    int lastOffset = 0;
+    public List<StoryItem> loadStories(int limit){
         OkHttpClient okHttpClient0 = new OkHttpClient().newBuilder().connectTimeout(20L, TimeUnit.SECONDS).readTimeout(20L, TimeUnit.SECONDS).writeTimeout(20L, TimeUnit.SECONDS).build();
         StoryApi api =  (StoryApi) new Retrofit.Builder().baseUrl("https://thetruestory.news/").client(okHttpClient0).addConverterFactory(((Converter.Factory) MoshiConverterFactory.create())).build().create(StoryApi.class);
-        Call<StoriesResponse> storiesReq = api.loadStories("ru", limit, offset, "1.0.3", 5, "android");
+        Call<StoriesResponse> storiesReq = api.loadStories("ru", limit, lastOffset, "1.0.3", 5, "android");
         Response<StoriesResponse> resp;
         StoriesResponse stories;
         List<Story> clusters;
@@ -81,9 +83,10 @@ public class StoryLoader {
             }
 
         } catch (IOException e) {
-
+            lastOffset += Stories.size();
             return Stories;
         }
+        lastOffset += Stories.size();
         return Stories;
     }
 }

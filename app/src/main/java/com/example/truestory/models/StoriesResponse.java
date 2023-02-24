@@ -1,4 +1,4 @@
-package com.example.truestory;
+package com.example.truestory.models;
 
 public final class StoriesResponse {
 
