@@ -1,6 +1,7 @@
 package com.example.truestory;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -91,8 +92,12 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
 
         public void setPicture(Bitmap picture){
-            this.picture = picture;
-            imgItem.setImageBitmap(this.picture);
+            if(picture == null){
+                imgItem.setImageBitmap(Bitmap.createBitmap(600,400, Bitmap.Config.ARGB_8888));
+            } else {
+                this.picture = picture;
+                imgItem.setImageBitmap(this.picture);
+            }
         }
         @Override
         public void onClick(View v) {
@@ -120,9 +125,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         viewHolder.setHeader(mItemList.get(position).getHeader());
         Bitmap picture = mItemList.get(position).getPicture();
-        if(picture!=null){
-            viewHolder.setPicture(picture);
+        if(picture==null){
+            int z = 0;
         }
+        viewHolder.setPicture(picture);
 
     }
 

@@ -1,6 +1,7 @@
 package com.example.truestory;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 
 
@@ -16,7 +17,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -31,7 +34,7 @@ public class MainActivity extends Activity {
     boolean isWaitingForUpdate = false;
     boolean isLoading = false;
 
-    StoryLoader storyLoader = new StoryLoader();
+    HashMap<String, Integer> clusterIndexes = new HashMap<String, Integer>();
     private final  Handler updateHandler = new Handler(Looper.getMainLooper()){
         public void handleMessage(Message msg) {
 
@@ -46,7 +49,14 @@ public class MainActivity extends Activity {
                     }
 
                     int insertPos = rowsArrayList.size();
-                    rowsArrayList.addAll(loadedStories);
+                    int index = insertPos;
+                    for (StoryItem itm:loadedStories
+                         ) {
+                        rowsArrayList.add(itm);
+                        clusterIndexes.put(itm.getCluster_id(), index);
+                        index++;
+                    }
+                    //rowsArrayList.addAll(loadedStories);
                     recyclerAdapter.notifyItemRangeInserted(insertPos, loadedStories.size());
                     loadedStories.clear();
                     isLoading = false;
@@ -56,10 +66,23 @@ public class MainActivity extends Activity {
 
 
                 //recyclerAdapter.notifyDataSetChanged();
+            } else if(msg.what == 1){
+                Bundle data = msg.getData();
+                String cluster = data.getString("id");
+                if(clusterIndexes.containsKey(cluster)){
+                    int position = clusterIndexes.getOrDefault(cluster, -1);
+                    if(position != -1){
+                        recyclerAdapter.notifyItemChanged(position);
+                    }
+                }
+
+
+
             }
 
         }
     };
+    StoryLoader storyLoader = new StoryLoader(updateHandler);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,7 +106,7 @@ public class MainActivity extends Activity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                loadedStories = storyLoader.loadStories(12);
+                loadedStories = storyLoader.loadStories(12, true);
                 isLoading = false;
                 updateHandler.sendEmptyMessage(0);
             }
@@ -144,9 +167,10 @@ public class MainActivity extends Activity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                loadedStories = storyLoader.loadStories(12);
+                loadedStories = storyLoader.loadStories(12,true);
                 isLoading = false;
                 updateHandler.sendEmptyMessage(0);
+
             }
         }).start();
 
